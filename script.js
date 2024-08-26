@@ -5,6 +5,12 @@ document.addEventListener("DOMContentLoaded", function () {
     let score = 0;
     let gameInterval;
 
+    const targetTypes = [
+        { color: "#ff0075", size: 50, points: 1 },   // Regular target
+        { color: "#00ff75", size: 30, points: 3 },   // Smaller, more points
+        { color: "#ffcc00", size: 70, points: 2 }    // Bigger, fewer points
+    ];
+
     startButton.addEventListener("click", startGame);
 
     function startGame() {
@@ -22,31 +28,43 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function spawnTarget(speed) {
         const target = document.createElement("div");
+        const targetType = targetTypes[Math.floor(Math.random() * targetTypes.length)];
         target.classList.add("target");
-        target.style.top = Math.random() * (gameArea.clientHeight - 50) + "px";
-        target.style.left = Math.random() * (gameArea.clientWidth - 50) + "px";
+        target.style.width = targetType.size + "px";
+        target.style.height = targetType.size + "px";
+        target.style.backgroundColor = targetType.color;
+        target.style.top = Math.random() * (gameArea.clientHeight - targetType.size) + "px";
+        target.style.left = Math.random() * (gameArea.clientWidth - targetType.size) + "px";
 
         gameArea.appendChild(target);
 
         target.addEventListener("click", () => {
-            score++;
+            score += targetType.points;
             scoreDisplay.textContent = "Score: " + score;
             target.remove();
         });
 
-        // Remove target after a certain time
         setTimeout(() => {
             target.remove();
         }, speed);
     }
 
-    // Stop the game and reset
     function stopGame() {
         clearInterval(gameInterval);
         startButton.disabled = false;
         gameArea.innerHTML = "";
+        checkHighScore();
     }
 
-    // Stop the game after 30 seconds
     setTimeout(stopGame, 30000);
+
+    function checkHighScore() {
+        const highScore = localStorage.getItem('highScore') || 0;
+        if (score > highScore) {
+            localStorage.setItem('highScore', score);
+            alert("New High Score: " + score);
+        } else {
+            alert("Your Score: " + score + "\nHigh Score: " + highScore);
+        }
+    }
 });
